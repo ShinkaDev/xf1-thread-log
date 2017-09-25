@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="shinka_thread_log" title="[Shinka] Thread Log" version_string="1.0.0" version_id="1" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates>
+    <template title="option_list_option_multiple"><![CDATA[<xen:selectunit size="10" multiple="true" label="{$preparedOption.title}" name="{$fieldPrefix}[{$preparedOption.option_id}]" value="{xen:raw $preparedOption.option_value}"
+    hint="{$preparedOption.hint}">
+
+   <xen:options source="$formatParams" selected="{$preparedOption.formatParams.selected}"/>
+   <xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
+   <xen:html>
+   <input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
+   {xen:raw $editLink}
+   </xen:html>
+</xen:selectunit>]]></template>
+    <template title="shinka_forum_chooser"><![CDATA[<xen:selectunit label="{$preparedOption.title}" name="{$fieldPrefix}[{$preparedOption.option_id}]" multiple="{$preparedOption.option_value}"
+hint="{$preparedOption.hint}" size="5">
+    <xen:options source="$formatParams" />
+    <xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
+    <xen:html>
+        <input type="hidden" name="{$listedFieldName}" multiple="{$preparedOption.option_id}" />
+        {xen:raw $editLink}
+    </xen:html>
+</xen:selectunit>]]></template>
+  </admin_templates>
+  <admin_template_modifications/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="Shinka_ThreadLog_Listener" callback_method="load_class_controller" active="1" hint="" description=""/>
+    <listener event_id="template_hook" execute_order="10" callback_class="Shinka_ThreadLog_Listener_TemplateHook" callback_method="templateHook" active="1" hint="" description=""/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups>
+    <group group_id="shinka_thread_log" display_order="10" debug_only="0"/>
+    <option option_id="shinka_thread_log_forums" edit_format="callback" data_type="array" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>Shinka_Option_Nodes::renderMultiple</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="shinka_thread_log" display_order="1"/>
+    </option>
+  </optiongroups>
+  <permissions>
+    <permission_groups>
+      <permission_group permission_group_id="shinkaThreadLog"/>
+    </permission_groups>
+    <permissions>
+      <permission permission_group_id="shinkaThreadLog" permission_id="hasThreadLog" permission_type="flag" default_value="unset" interface_group_id="threadlog" display_order="1"/>
+      <permission permission_group_id="shinkaThreadLog" permission_id="viewThreadLogs" permission_type="flag" default_value="unset" interface_group_id="threadlog" display_order="1"/>
+    </permissions>
+    <interface_groups>
+      <interface_group interface_group_id="threadlog" display_order="100"/>
+    </interface_groups>
+  </permissions>
+  <phrases>
+    <phrase title="option_group_shinka_thread_log" version_id="0" version_string="0.0.1"><![CDATA[[Shinka] Thread Log]]></phrase>
+    <phrase title="option_group_shinka_thread_log_description" version_id="0" version_string="0.0.1"><![CDATA[]]></phrase>
+    <phrase title="option_shinka_thread_log_forums" version_id="0" version_string="0.0.1"><![CDATA[Thread Log Forums]]></phrase>
+    <phrase title="option_shinka_thread_log_forums_explain" version_id="0" version_string="0.0.1"><![CDATA[]]></phrase>
+    <phrase title="permission_interface_threadlog" version_id="0" version_string="0.0.1"><![CDATA[Thread Log]]></phrase>
+    <phrase title="permission_shinkaThreadLog_hasThreadLog" version_id="0" version_string="0.0.1"><![CDATA[Has Thread Log]]></phrase>
+    <phrase title="permission_shinkaThreadLog_viewThreadLogs" version_id="0" version_string="0.0.1"><![CDATA[View Thread Logs]]></phrase>
+  </phrases>
+  <route_prefixes>
+    <route_type type="public">
+      <prefix original_prefix="thread-log" class="Shinka_ThreadLog_Route_Prefix_ThreadLog" build_link="all"/>
+    </route_type>
+  </route_prefixes>
+  <style_properties/>
+  <templates>
+    <template title="shinka_thread_log_tabs_content"><xen:require css="discussion_list.css" /><![CDATA[<xen:require js="/js/Shinka/ThreadLog/thread_log.js" />
+
+<li id="threadLog" class="profileContent">
+      <div class="section text-center">
+		<xen:if is="{$threads}">			
+			<a href="#" id="active">{$count.active} Active</a> &middot;
+			<a href="#" id="closed">{$count.closed} Closed</a> &middot;
+			<a href="#" id="need_replies">{$count.need_replies} Need Replies</a> &middot;
+			<a href="#" id="total">{$count.total} Total</a>
+		
+	</div>
+	
+	<div class="section">
+			<ul class="discussionList">
+			<xen:foreach loop="$threads" value="$thread">
+			
+				<li class="discussionListItem thread
+				           {xen:if '{$thread.discussion_open}', 'active', 'closed' } 
+					   {xen:if '{$thread.discussion_open} && {$thread.last_post_user_id} != {$user_id}', 'need_replies' }">
+				    	
+				    	<div class="listBlock posterAvatar">
+					    <span class="avatarContainer">
+					        <xen:avatar user="$thread" size="s" img="true" />
+					        <xen:if is="{$thread.user_post_count}"><xen:avatar user="$visitor" size="s" img="true" class="miniMe" title="{xen:phrase you_have_posted_x_messages_in_this_thread, 'count={xen:number $thread.user_post_count}'}" /></xen:if>
+					    </span>
+					</div>
+					
+					<div class="listBlock main">
+					
+					    <div class="titleText">	
+					
+					        <h3 class="title">
+					        	<xen:if is="{$thread.prefix_id}">
+								<xen:if is="{$linkPrefix}">
+									<a href="{xen:link forums, $forum, 'prefix_id={$thread.prefix_id}'}" class="prefixLink"
+										title="{xen:phrase show_only_threads_prefixed_by_x, 'prefix={xen:helper threadPrefix, $thread, plain, ""}'}">{xen:helper threadPrefix, $thread, html, ''}</a>
+								<xen:else />
+									{xen:helper threadPrefix, $thread}
+								</xen:if>
+							</xen:if>
+					            <a href="{xen:link "threads", $thread}">
+					                {$thread.title}
+					            </a>
+					        </h3>
+					            
+					        <div class="secondRow">
+					            <span class="startDate">
+					                <a{xen:if {$visitor.user_id}, ' href="{xen:link threads, $thread}"'} class="faint">
+					            	    {$thread.username},
+					                    <xen:datetime time="$thread.post_date" title="{xen:if {$visitor.user_id}, '{xen:phrase go_to_first_message_in_thread}'}" />
+					                </a>
+					            </span>
+					        </div>
+					    </div>
+					</div>
+					
+					<div class="listBlock stats pairsJustified">
+					    <dl class="major"><dt>{xen:phrase replies}:</dt> <dd>{xen:number $thread.reply_count}</dd></dl>
+					    <dl class="minor"><dt>{xen:phrase views}:</dt> <dd>{xen:number $thread.view_count}</dd></dl>
+					</div>
+					
+					<div class="listBlock lastPost">
+					    <dl class="lastPostInfo">
+					        <dt>
+					            <xen:if is="{xen:helper isIgnored, $thread.last_post_user_id}">
+					                {xen:phrase ignored_member}
+					            <xen:else />
+					                {$thread.last_post_username}
+					            </xen:if>
+					        </dt>
+					        <dd class="muted"><xen:datetime time="$thread.lastPostInfo.post_date" /></dd>
+					    </dl>
+					</div>
+
+				</li>
+				
+				
+			</xen:foreach>
+			</ul>
+			
+		<xen:else />
+			{xen:phrase shinka_thread_log_no_threads, 'user={$user.username}'}
+		</xen:if>     
+      </div>
+</li>]]></template>
+    <template title="shinka_thread_log_tabs_heading"><![CDATA[<li><a href="{$requestPaths.requestUri}#threadLog">{xen:phrase shinka_thread_log}</a></li>]]></template>
+  </templates>
+  <public_template_modifications/>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
